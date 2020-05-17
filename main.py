@@ -1,40 +1,75 @@
 import telebot as tb
 from pyes import consts
 from pyes import markups as mp
+from pyes import converts
 
 bot = tb.TeleBot(consts.token)
 
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-    bot.reply_to(message, "Bot converts your files into needed format"
+    bot.reply_to(message, "Bot converts your files into needed format\n"
                           "Send yor file please")
     # bot.send_message(message.from_user.id, 'Please select what do you like to convert',
     #                  reply_markup=mp.select_mode_mrkp)
 
 
-@bot.message_handler(content_types=['voice', 'audio', 'document', 'photo', 'video', 'video_note'])
-def ans_file(file):
-    # bot.download_file('C:\\Users\\Major\\Desktop\\Progs\\tgConvertBot\\files\\')
-    bot.send_message(file.from_user.id, "test text")
+@bot.message_handler(commands=['check_list'])
+def send_list(message):
+    ans = converts.gen_list_of_formats()
+    bot.send_message(message.from_user.id, 'You can send one of the following types of files:')
+    bot.send_message(message.from_user.id, ans)
+
+
+@bot.message_handler(content_types=['voice'])
+def ans_voice(message):
+    file_id = message.voice.file_id
+    file_info = bot.get_file(file_id)
+    file = bot.download_file(file_info.file_path)
+    bot.send_message(message.from_user.id, "Please send a name for your future audio file")
+    file_name = set_voice_name()
+    file_path = consts.dir_path + file_name + '.ogg'
+    with open(file_path, 'wb') as new_file:
+        new_file.write(file)
+
+    bot.send_message(message.from_user.id, consts.file_ans,
+                     reply_markup=mp.gen_mrkp('voice', consts.formats['voice']))
+    ans_mrkp_voice(file_path=file_path)
+
+
+@bot.message_handler(content_types=['text'])
+def set_voice_name(name):
+    return name.text
+
+
+@bot.message_handler(content_types=['text'])
+def ans_mrkp_voice(to_type, file_path):
+    if to_type == 'mp3':
+        converts.from_ogg_to_mp3(file_path)
+
+
+@bot.message_handler(content_types=['audio'])
+def ans_audio(message):
+    bot.send_message(message.from_user.id, consts.file_ans)
+    bot.send_message(message.from_user.id, "тут потом має бути клавіатура")
+    file_id = message.audio.file_id
+    file_info = bot.get_file(file_id)
+    file = bot.download_file(file_info.file_path)
+    with open(consts.dir_path + 'new_file.mp3', 'wb') as new_file:
+        new_file.write(file)
+
+#############################################################################
+# @bot.message_handler(content_types=['document'])
+# def ans_audio(message):
+#     bot.send_message(message.from_user.id, consts.file_ans)
+#############################################################################
 
 
 @bot.message_handler(func=lambda message: True)
 def send_error(message):
     bot.send_message(message.from_user.id, "Just send us file.\n"
                                            "You can easily check the list of available formats "
-                                           "by /check list command")
-
-
-# @bot.callback_query_handler(func=lambda call: True)
-# def callback_query(call):
-#     if call.data == 'img':
-#         bot.send_message(call.from_user.id, 'send',
-#                          reply_markup=mp.select_mode_mrkp)
-#     elif call.data == 'audio':
-#         bot.answer_callback_query(call.id, "beta")
-#     elif call.data == 'video':
-#         bot.answer_callback_query(call.id, "beta")
+                                           "by /check_list command")
 
 
 bot.polling(none_stop=True, interval=0, timeout=0)
