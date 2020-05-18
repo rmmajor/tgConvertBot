@@ -26,26 +26,25 @@ def ans_voice(message):
     file_id = message.voice.file_id
     file_info = bot.get_file(file_id)
     file = bot.download_file(file_info.file_path)
-    bot.send_message(message.from_user.id, "Please send a name for your future audio file")
-    file_name = set_voice_name()
-    file_path = consts.dir_path + file_name + '.ogg'
-    with open(file_path, 'wb') as new_file:
-        new_file.write(file)
 
-    bot.send_message(message.from_user.id, consts.file_ans,
-                     reply_markup=mp.gen_mrkp('voice', consts.formats['voice']))
-    ans_mrkp_voice(file_path=file_path)
+    def set_voice_name(name):
+        file_name = name.text
+        file_path = consts.dir_path + file_name + '.ogg'
+        with open(file_path, 'wb') as new_file:
+            new_file.write(file)
+
+    msg = bot.send_message(message.from_user.id, "Please send a name for your future audio file")
+    bot.register_next_step_handler(msg, set_voice_name)
+
+    # bot.send_message(message.from_user.id, consts.file_ans,
+    #                  reply_markup=mp.gen_mrkp('voice', consts.formats['voice']))
+    # ans_mrkp_voice(file_path=file_path)
 
 
-@bot.message_handler(content_types=['text'])
-def set_voice_name(name):
-    return name.text
-
-
-@bot.message_handler(content_types=['text'])
-def ans_mrkp_voice(to_type, file_path):
-    if to_type == 'mp3':
-        converts.from_ogg_to_mp3(file_path)
+# @bot.message_handler(content_types=['text'])
+# def ans_mrkp_voice(to_type, file_path):
+#     if to_type == 'mp3':
+#         converts.from_ogg_to_mp3(file_path)
 
 
 @bot.message_handler(content_types=['audio'])
@@ -57,6 +56,7 @@ def ans_audio(message):
     file = bot.download_file(file_info.file_path)
     with open(consts.dir_path + 'new_file.mp3', 'wb') as new_file:
         new_file.write(file)
+
 
 #############################################################################
 # @bot.message_handler(content_types=['document'])
