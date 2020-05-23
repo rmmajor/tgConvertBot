@@ -6,14 +6,16 @@ dir_path = 'tgConvertBot/files/'
 
 all_types = {
     'voice', 'mp3', 'txt', 'docx', 'pdf', 'png', 'jpg', 'svg'
-    'video_note', 'mp4',
+    'video_note', 'mp4', 'wav', 'ogg',
 }
 
 formats = {
-    'audio': ('voice', ),
-    'voice': ('mp3', ),
+    'audio': ('voice', 'ogg', 'wav'),
+    'voice': ('mp3', 'ogg', 'wav'),
     'document': ('txt', 'docx', 'pdf'),
     'photo': ('png', 'jpg', 'svg'),
     'video': ('video_note', ),
-    'video_note': ('mp4', 'mov', 'mkv', 'avi')
+    'video_note': ('mp4', 'mov', 'mkv', 'avi'),
+    'animated_sticker': ('sticker without its pack', ),
+    'sticker': ('png', 'jpg', 'svg', 'sticker without its pack'),
 }
