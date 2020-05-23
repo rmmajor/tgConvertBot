@@ -12,7 +12,3 @@ def gen_list_of_formats():
     for keys in consts.formats:
         res += '\n'.join(consts.formats[keys]) + '\n'
     return res
-
-
-def from_video_note_to_smth(needed_type):
-    pass

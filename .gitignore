@@ -1,7 +1,3 @@
-
-# Created by https://www.gitignore.io/api/windows
-# Edit at https://www.gitignore.io/?templates=windows
-
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db
@@ -28,4 +24,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.gitignore.io/api/windows
+# Other
+__pycache__
+

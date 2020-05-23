@@ -1,9 +1,12 @@
-import telebot as tb
 from pyes import consts
 from pyes import markups as mp
-from pyes import converts
-
-bot = tb.TeleBot(consts.token)
+from converts import converts
+from converts import voice_converts
+from converts import audio_converts
+from converts import video_converts
+from converts import video_note_converts
+from converts import sticker_converts
+from bot_config import bot
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -27,152 +30,28 @@ def donate_ans(message):
 
 
 @bot.message_handler(content_types=['voice'])
-def ans_voice(message):
-    msg1 = bot.send_message(message.from_user.id, consts.file_ans,
-                            reply_markup=mp.gen_mrkp('voice', consts.formats['voice']))
-
-    def ans_mrkp_voice(to_type):
-        # if to_type.text == 'mp3':
-        file_id = message.voice.file_id
-        file_info = bot.get_file(file_id)
-        file = bot.download_file(file_info.file_path)
-        file_name = 'unknown'
-        file_path = consts.dir_path + file_name + '.' + to_type.text
-        with open(file_path, 'wb') as new_file:
-            new_file.write(file)
-        send_from_voice(to_type.from_user.id, to_type.text, file_path)
-
-    bot.register_next_step_handler(msg1, ans_mrkp_voice)
-
-
-def send_from_voice(user_id, file_type, file_path):
-    file = open(file_path, 'rb')
-    if file_type == 'mp3':
-        bot.send_audio(user_id, file)
-    else:
-        bot.send_document(user_id, file)
+def echo_voice(message):
+    voice_converts.ans_voice(message)
 
 
 @bot.message_handler(content_types=['audio'])
-def ans_audio(message):
-    bot.send_message(message.from_user.id, "We're processing your request...")
-
-    def audio_file_procession(msg):
-        file_id = message.audio.file_id
-        file_info = bot.get_file(file_id)
-        file = bot.download_file(file_info.file_path)
-        file_name = message.audio.title + '.'
-        file_type = msg.text
-        file_path = consts.dir_path + file_name + file_type
-        if file_type == 'voice':
-            file_path.replace(file_type, 'ogg')
-        with open(file_path, 'wb') as new_file:
-            new_file.write(file)
-
-        send_from_mp3(msg.from_user.id, file_type, file_path)
-
-    msg = bot.send_message(message.from_user.id, consts.file_ans,
-                           reply_markup=mp.gen_mrkp('audio', consts.formats['audio']))
-    bot.register_next_step_handler(msg, audio_file_procession)
-
-
-def send_from_mp3(user_id, file_type, file_path):
-    file = open(file_path, 'rb')
-    if file_type == 'voice':
-        bot.send_voice(user_id, file)
-    elif file_type == 'mp3':
-        bot.send_audio(user_id, file)
-    else:
-        bot.send_document(user_id, file)
-    file.close()
+def echo_audio(message):
+    audio_converts.ans_audio(message)
 
 
 @bot.message_handler(content_types=['video'])
-def ans_video(message):
-    bot.send_message(message.from_user.id, "We're processing your request...")
-    file_id = message.video.file_id
-    file_info = bot.get_file(file_id)
-    file = bot.download_file(file_info.file_path)
-    file_name = 'unknown.'
-    file_type = converts.get_type(message.video.mime_type)
-    if file_type not in consts.all_types:
-        # bot.send_message(message.from_user.id, "")
-        send_error(message)
-    file_path = consts.dir_path + file_name + file_type
-    with open(file_path, 'wb') as new_file:
-        new_file.write(file)
-    bot.send_message(message.from_user.id, consts.file_ans,
-                     reply_markup=mp.gen_mrkp('video', consts.formats['video']))
-    print('done')
+def echo_video(message):
+    video_converts.ans_video(message)
 
 
 @bot.message_handler(content_types=['video_note'])
-def ans_video_note(message):
-    bot.send_message(message.from_user.id, "We're processing your request...")
-    file_type = ''
-
-    def video_note_file_processing(msg):
-        file_type = msg.text
-        file_id = message.video_note.file_id
-        file_info = bot.get_file(file_id)
-        file = bot.download_file(file_info.file_path)
-        file_name = 'unknown.'
-        file_path = consts.dir_path + file_name + file_type
-        with open(file_path, 'wb') as new_file:
-            new_file.write(file)
-        video = open(file_path, 'rb')
-        bot.send_document(message.from_user.id, video)
-
-    msg = bot.send_message(message.from_user.id, consts.file_ans,
-                           reply_markup=mp.gen_mrkp('video_note', consts.formats['video_note']))
-    bot.register_next_step_handler(msg, video_note_file_processing)
-    print('done1')
+def echo_video_note(message):
+    video_note_converts.ans_video_note(message)
 
 
 @bot.message_handler(content_types=['sticker'])
-def ans_sticker(message):
-    bot.send_message(message.from_user.id, "We're processing your request...")
-    file_id = message.sticker.file_id
-    file_info = bot.get_file(file_id)
-    file = bot.download_file(file_info.file_path)
-    file_name = 'unknown.'
-    msg = None
-    file_type = None
-
-    def sticker_processing(msg):
-        nonlocal file_type, file
-        flag = 1
-        file_type = msg.text
-        if msg.text == 'sticker without its pack':
-            file_type = 'png'
-            flag = 0
-        file_path = consts.dir_path + file_name + file_type
-        with open(file_path, 'wb') as new_file:
-            new_file.write(file)
-        file = open(file_path, 'rb')
-        if flag:
-            bot.send_document(msg.from_user.id, file)
-        else:
-            bot.send_sticker(msg.from_user.id, file)
-
-    def animated_sticker_processing(msg):
-        nonlocal file_type, file
-        if msg.text == 'sticker without its pack':
-            file_type = 'tgs'
-        file_path = consts.dir_path + file_name + file_type
-        with open(file_path, 'wb') as new_file:
-            new_file.write(file)
-        file = open(file_path, 'rb')
-        bot.send_document(msg.from_user.id, file)
-
-    if message.sticker.is_animated:
-        msg = bot.send_message(message.from_user.id, consts.file_ans,
-                               reply_markup=mp.gen_mrkp('', consts.formats['animated_sticker']))
-        bot.register_next_step_handler(msg, animated_sticker_processing)
-    else:
-        msg = bot.send_message(message.from_user.id, consts.file_ans,
-                               reply_markup=mp.gen_mrkp('', consts.formats['sticker']))
-        bot.register_next_step_handler(msg, sticker_processing)
+def echo_sticker(message):
+    sticker_converts.ans_sticker(message)
 
 
 @bot.message_handler(content_types=['photo'])
