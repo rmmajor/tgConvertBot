@@ -4,6 +4,7 @@ from converts import converts
 from converts import voice_converts
 from converts import audio_converts
 from converts import video_converts
+from converts import docs_converts
 from converts import video_note_converts
 from converts import sticker_converts
 from bot_config import bot
@@ -13,8 +14,6 @@ from bot_config import bot
 def send_welcome(message):
     bot.reply_to(message, "Bot converts your files into needed format\n"
                           "Send yor file please")
-    # bot.send_message(message.from_user.id, 'Please select what do you like to convert',
-    #                  reply_markup=mp.select_mode_mrkp)
 
 
 @bot.message_handler(commands=['check_list'])
@@ -52,6 +51,15 @@ def echo_video_note(message):
 @bot.message_handler(content_types=['sticker'])
 def echo_sticker(message):
     sticker_converts.ans_sticker(message)
+
+
+@bot.message_handler(content_types=['document'])
+def echo_doc(message):
+    file_type = docs_converts.get_type(message.document.file_name)
+    if converts.not_in_list(file_type):
+        send_error(message)
+    else:
+        docs_converts.ans_doc(message)
 
 
 @bot.message_handler(content_types=['photo'])
