@@ -4,13 +4,13 @@ dir_path = 'tgConvertBot/files/'
 
 all_types = (
     'voice', 'mp3', 'txt', 'docx', 'pdf', 'png', 'jpg', 'ico',
-    'video_note', 'mp4', 'wav', 'ogg', 'mov', 'bmp',
+    'video_note', 'mp4', 'wav', 'ogg', 'mov', 'bmp', 'doc',
 )
 
 formats = {
     'audio': ('voice', 'ogg', 'wav'),
     'voice': ('mp3', 'ogg', 'wav'),
-    'text_document': ('txt', 'docx', 'pdf'),
+    'text_document': ('txt', 'docx', 'pdf', 'doc'),
     'photo': ('png', 'jpg', 'ico', 'bmp'),
     'video': ('video_note', 'avi', 'mov', 'mkv'),
     'video_note': ('mp4', 'mov', 'mkv', 'avi'),
