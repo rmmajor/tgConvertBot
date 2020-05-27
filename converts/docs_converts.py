@@ -4,7 +4,7 @@ from pyes import markups as mp
 from PIL import Image
 import docx2pdf
 import docx2txt
-
+import docx
 
 def get_type(name):
     # gets word after last '.'
@@ -59,6 +59,14 @@ def convert_text_doc(file_path, file_type, convert_to, user_id):
         with open(new_file_path, 'w') as new_file:
             new_file.write(text)
         file = open(new_file_path, 'r')
+
+    if file_type == 'txt' and (convert_to == 'docx' or convert_to == 'doc'):
+        file = open(file_path, 'r')
+        text = file.read()
+        doc = docx.Document()
+        doc.add_paragraph(text)
+        doc.save(new_file_path)
+        file = open(new_file_path, 'rb')
 
     bot.send_document(user_id, file)
 
