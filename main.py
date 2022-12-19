@@ -23,11 +23,6 @@ def send_list(message):
     bot.send_message(message.from_user.id, ans)
 
 
-@bot.message_handler(commands=['donate'])
-def donate_ans(message):
-    bot.send_message(message.from_user.id, 'Coming soon :)')
-
-
 @bot.message_handler(content_types=['voice'])
 def echo_voice(message):
     voice_converts.ans_voice(message)
